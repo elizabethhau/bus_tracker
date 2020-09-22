@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html></html>
+<head>
+  <meta charset="utf-8" />
+  <title>Map</title>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+  <link
+    href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    .map-overlay {
+      position: absolute;
+      left: 0;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Second Map with Marker</h1>
+
+  <div id="map"></div>
+  <!-- <div class="map-overlay top">
+      <button style="font-size: 2em;" onclick="move()">Show stops between MIT and Harvard</button>
+  </div> -->
+  <script>
+    mapboxgl.accessToken =
+      "pk.eyJ1IjoiZWhhdSIsImEiOiJja2ZkZHN0aGEwMnk4MnFwMmxvbnp2M3phIn0.wlp41fwke4mUqMLBqQcJMA";
+    var map = new mapboxgl.Map({
+      container: "map",
+      // style: "mapbox://styles/mapbox/dark-v10", // stylesheet location
+      style: "mapbox://styles/mapbox/streets-v11", // stylesheet location
+      center: [-71.091542, 42.358862], // starting position [lng, lat]
+      zoom: 14, // starting zoom
+    });
+
+    // var counter = 0;
+    // function move(marker, stops, current_index) {
+    //   setTimeout(() => {
+    //     if (current_index >= stops.length) return;
+    //     marker.setLngLat(stops[current_index]);
+    //     current_index++;
+    //     move();
+    //   }, 1000);
+    // }
+
+    // function move_buses() {
+    //   for (key in bus_markers) {
+    //     current_index = bus_markers[key]["current_stop_index"]
+    //     marker = bus_markers[key]
+    //     setTimeout(() => {
+    //         stops = buses[id]
+    //         if (current_index < stops) {
+    //             marker.setLngLat(stops[current_index])
+    //             bus_markers[key]["current_stop_index"] += 1
+    //             move();
+    //         }
+    //     }, 3000);
+    //   }
+    // }
+
+    // var buses = {};
+    var markers = []
+    // var current_index = 0
+    async function run() {
+      var locations = await getBusLocations();
+     
+      console.log(new Date());
+      console.log(locations);
+      // console.log("buses:");
+      // console.log(buses);
+
+      var bus_stops = []
+      if (markers.length == 0) {
+        for (let i = 0; i < locations.length; i++) {
+          markers.push(new mapboxgl.Marker())
+        }
+      }
+      console.log('markers:')
+      console.log(markers)
+      
+      for (let i = 0; i < locations.length; i++) {
+        bus = locations[i]
+        lngLat = [bus.attributes.longitude, bus.attributes.latitude];
+        markers[i].setLngLat(lngLat).addTo(map)
+      }
+      
+      // locations.forEach((bus) => {
+      //   // console.log(bus);
+      //   id = bus.id;
+
+      //   lngLat = [bus.attributes.longitude, bus.attributes.latitude];
+      //   bus_stops.push(lngLat)
+      //   if (id in buses) {
+      //     buses[id].push(lngLat);
+      //   } else {
+      //     buses[id] = [lngLat];
+      //   }
+      // });
+      console.log('bus stops')
+      console.log(bus_stops)
+
+      // for (let i = 0; i < bus_stops.length; i++) {
+      //   if (markers.length < bus_stops.length) {
+      //     let marker = new mapboxgl.Marker()
+      //     markers.push(marker)
+      //     marker.setLngLat(bus_stops[i]).addTo(map)
+      //   } else {
+      //     marker = markers[i].setLngLat(bus_stops[i]).addTo(map)
+      //   }
+      // }
+      // console.log(bus_stops)
+      // timer
+      setTimeout(run, 10000); // every 10 seconds
+    }
+
+    async function getBusLocations() {
+      const url =
+        "https://api-v3.mbta.com/vehicles?filter[route]=1&include=trip";
+      const response = await fetch(url);
+      const json = await response.json();
+      return json.data;
+    }
+
+    run();
+  </script>
+</body>
